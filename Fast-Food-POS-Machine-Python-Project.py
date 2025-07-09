@@ -131,7 +131,7 @@ def retrieve_discount():
             f"with a {rewards_input} rewards card.")
         return discount
     else:
-        print("No discount for you!")
+        print("No discount will be applied to your order.")
         return 1 # no discount on the customer's order
 
 def receipt_print(buying_data, discount): 
