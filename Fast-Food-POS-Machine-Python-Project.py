@@ -3,7 +3,7 @@ from sys import exit
 
 # --- Product Menu ---
 # product_menu() function relys on content in the dicitonary below
-product_prices = {
+PRODUCT_PRICES = {
     # "PRODUCT-NAME": COST
     "BURGER": 3.25,
     "POP-DRINK": 1.75,
@@ -14,7 +14,8 @@ product_prices = {
     "CHICKEN-NUGGETS": 2.00,
     "MILKSHAKE": 2.50,
     "KIDS-MEAL": 1.50,
-    "YUM-BISCUITS": 0.50
+    "YUM-BISCUITS": 0.50,
+    "FISH-SANDWICH": 2.00
 }
 
 def hor_line(): # Horizontal Line
@@ -26,7 +27,7 @@ def product_menu():
         hor_line() # Line Print
         # * Iterates through the dictionary by displaying 
         #   item names and prices
-        for product, price in product_prices.items():
+        for product, price in PRODUCT_PRICES.items():
             # * <22 aligns all product names on the left in a field
             #   that is 22 characters wide
             # * .2f displays all product prices with two decimal places
@@ -36,7 +37,7 @@ def product_menu():
         hor_line() # Line Print
 
 def option_interface():
-    print("Welcome to the Fast Food Restaraunt!")
+    print("Welcome to the Fast Food Restaurant!")
     print("Made by Jayzee Monserate\n")
     print("-> Type 'A' to add a product.")
     print("-> Type 'Z' to view product prices.")
@@ -46,12 +47,22 @@ def option_interface():
 
 def entering_products():
 
-    def clear_items(buying_data):
+    def clear_items():
         buying_data.clear()
         print("All items cleared!")
 
-    def view_items(buying_data):
-        print(buying_data)
+    def view_items():
+        if len(buying_data) == 0:
+            print("No items are in your order yet.")
+            return # Prevents printing an empty table
+        
+        hor_line()
+        print(f"{'Product':^30} | {'Quantity':^30} ")
+        # * ^30 aligns all product names on the centre in a field
+        #   that is 30 characters wide
+        for product, quantity in buying_data.items():
+            print(f"{product:^30} | {quantity:^30}")
+        hor_line()
 
     buying_data = {} # Declares buying_data as a dictionary globally
     options = {
@@ -60,8 +71,8 @@ def entering_products():
 
         "A": lambda: add_product(buying_data),
         "Z": product_menu,
-        "X": lambda: clear_items(buying_data),
-        "V": lambda: view_items(buying_data)
+        "X": clear_items,
+        "V": view_items
     }
 
     product_entry = True
@@ -86,11 +97,22 @@ def add_product(buying_data):
     while True:
         try:
             product = input("Enter the product name: ").strip().upper()
+            if product not in PRODUCT_PRICES: 
+                # * Occurs if user inputs a product not in the 
+                # PRODUCT_PRICES dictionary
+                print(f"{product} is not in the menu!")
+                continue
             quantity = int(input("Enter the quantity of the product: "))
             if quantity <= 0:
                 print("Please enter a quantity greater than 0!")
                 continue
             # Adds item to buying_data dictionary
+            if product in buying_data:
+                print(
+                    f"{product} quantity will be changed from "
+                    f"{buying_data[product]} to {quantity}."
+                )
+
             buying_data.update({product: quantity})
             break
         # Raises exception if user inputs non-whole number
@@ -98,18 +120,13 @@ def add_product(buying_data):
             print("Quantity input can only accept whole numbers!")
 
 def price_dictionary(product, quantity):
-    if product in product_prices:
-        # [product] searches for the value with a given product name
-        subtotal = product_prices[product] * quantity
-        print(
-            f"{product}: ${product_prices[product]:.2f} "
-            f"x {quantity} = ${subtotal:.2f}"
-        )
+    # [product] searches for the value with a given product name
+    subtotal = PRODUCT_PRICES[product] * quantity
+    print(
+        f"{product}: ${PRODUCT_PRICES[product]:.2f} "
+        f"x {quantity} = ${subtotal:.2f}"
+    )
         
-    else: # Occurs when user types a product not in the menu
-        print(f"{product} is not in the menu!")
-        return 0
-    
     return subtotal
 
 def retrieve_discount(): 
@@ -131,7 +148,7 @@ def retrieve_discount():
             f"with a {rewards_input} rewards card.")
         return discount
     else:
-        print("No discount will be applied to your order.")
+        print("No discount for you!")
         return 1 # no discount on the customer's order
 
 def receipt_print(buying_data, discount): 
@@ -156,7 +173,7 @@ def receipt_print(buying_data, discount):
             f"the total amount is now ${discounted_amount:.2f}."
         )
 
-    # If user had a rewards card but spent less than $15 on their order
+    # If user had a rewards card but spent less than $15 on their order       
     elif discount < 1 and total_amount < 15: 
         print(
             "\nYour order must amount to at least $15 " 
